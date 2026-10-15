@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>우리 반 방명록</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 40px 16px;
+      font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      background: #fdf6ec;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 0 0 32px;
+      font-size: 2.2rem;
+      color: #5a3e2b;
+    }
+
+    /* 글쓰기 폼 */
+    .write-box {
+      max-width: 600px;
+      margin: 0 auto 40px;
+      padding: 20px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .write-box input,
+    .write-box textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-family: inherit;
+    }
+
+    .write-box textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .write-box button {
+      align-self: flex-end;
+      padding: 10px 24px;
+      border: none;
+      border-radius: 10px;
+      background: #ff9f68;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .write-box button:hover {
+      background: #ff8a4c;
+    }
+
+    /* 카드 섹션 */
+    .cards {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px) rotate(-1deg);
+    }
+
+    .card:nth-child(4n+1) { background: #fff3b0; }
+    .card:nth-child(4n+2) { background: #c8f7dc; }
+    .card:nth-child(4n+3) { background: #d6e6ff; }
+    .card:nth-child(4n+4) { background: #ffd6e0; }
+
+    .card .name {
+      margin: 0 0 10px;
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+
+    .card .message {
+      margin: 0 0 14px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .card .date {
+      font-size: 0.85rem;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <h1>우리 반 방명록</h1>
+
+  <form class="write-box" id="guestForm">
+    <input type="text" id="nameInput" placeholder="이름" maxlength="20" required>
+    <textarea id="messageInput" placeholder="친구들에게 남기고 싶은 말을 적어 주세요" maxlength="200" required></textarea>
+    <button type="submit">남기기</button>
+  </form>
+
+  <section class="cards" id="cards">
+    <article class="card">
+      <p class="name">선생님</p>
+      <p class="message">우리 반 모두 환영해요! 즐거운 한 해 보내요 😊</p>
+      <span class="date">2026. 10. 15.</span>
+    </article>
+    <article class="card">
+      <p class="name">민준</p>
+      <p class="message">다들 친하게 지내자!</p>
+      <span class="date">2026. 10. 15.</span>
+    </article>
+    <article class="card">
+      <p class="name">서연</p>
+      <p class="message">이번 체육대회 꼭 우승하자 🏆</p>
+      <span class="date">2026. 10. 15.</span>
+    </article>
+  </section>
+
+  <script>
+    const form = document.getElementById("guestForm");
+    const cards = document.getElementById("cards");
+    const STORAGE_KEY = "class-guestbook";
+
+    function loadEntries() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveEntries(entries) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+      } catch (e) {
+        // 저장이 안 되는 환경이면 화면에만 표시
+      }
+    }
+
+    function addCard(entry) {
+      const card = document.createElement("article");
+      card.className = "card";
+
+      const name = document.createElement("p");
+      name.className = "name";
+      name.textContent = entry.name;
+
+      const message = document.createElement("p");
+      message.className = "message";
+      message.textContent = entry.message;
+
+      const date = document.createElement("span");
+      date.className = "date";
+      date.textContent = entry.date;
+
+      card.append(name, message, date);
+      cards.prepend(card);
+    }
+
+    const entries = loadEntries();
+    entries.forEach(addCard);
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const entry = {
+        name: document.getElementById("nameInput").value.trim(),
+        message: document.getElementById("messageInput").value.trim(),
+        date: new Date().toLocaleDateString("ko-KR")
+      };
+      if (!entry.name || !entry.message) return;
+
+      addCard(entry);
+      entries.push(entry);
+      saveEntries(entries);
+      form.reset();
+    });
+  </script>
+</body>
+</html>
